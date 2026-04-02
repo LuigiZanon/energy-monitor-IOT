@@ -13,11 +13,34 @@ short ciclos = 2;
 
 const uint32_t TEMPO_AMOSTRAGEM_US = (1000000 / 60) * ciclos;
 
+double pegaOffset(int pino){
+
+    long somaRaw = 0;
+    const int numeroAmostras = 1000;
+
+    for (int i = 0; i < numeroAmostras; i++) {
+        int16_t adc = ads.readADC_SingleEnded(pino); 
+        
+        somaRaw += adc;
+        delay(1); 
+    }
+
+    double offsetMedioRaw = (float)somaRaw / numeroAmostras;
+
+    return offsetMedioRaw;
+
+}
 
 void TaskCurrentSensor(void *pvParameters)
 {
-    static double offsetDC_SCT = 13200.0;
-    static double offset_ZMPT = 12681.42;
+    static double offsetDC_SCT = pegaOffset(0);
+    Serial.print("offsetDC_SCT:");
+    Serial.println(offsetDC_SCT);
+    static double offset_ZMPT = pegaOffset(1);
+    Serial.print("offsetZMPT:");
+    Serial.println(offset_ZMPT);
+
+    delay(5000);
 
     for (;;)
     {
@@ -60,12 +83,12 @@ void TaskCurrentSensor(void *pvParameters)
                 correnteReal = 0.00;
             }
 
-            //Serial.print(">Corrente:");
-            //Serial.println(correnteReal);
-            Serial.print(">Volts");
+            Serial.print(">Corrente:");
+            Serial.println(correnteReal);
+            Serial.print(">Volts:");
             Serial.println(tensaoReal);
         }
 
-        vTaskDelay(pdMS_TO_TICKS(5));
+        vTaskDelay(pdMS_TO_TICKS(200));
     }
 }
