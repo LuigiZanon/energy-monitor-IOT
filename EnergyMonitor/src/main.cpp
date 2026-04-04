@@ -8,17 +8,25 @@
 #include "SPI.h"
 #include "sensor.h"
 #include "processing.h"
+#include "display.h"
 
-#define SD_CS   15
-#define SD_SCK  17
-#define SD_MOSI 5
+#define BUTTON_PIN 13
+
+#define SD_CS 4
+#define SD_SCK 16
+#define SD_MOSI 17
 #define SD_MISO 18
+
+#define DP_SDA 27
+#define DP_SCL 26
 
 SPIClass spi = SPIClass(VSPI);
 
 TwoWire I2C_ads = TwoWire(1);
+TwoWire I2C_display = TwoWire(2);
 
 Adafruit_ADS1115 ads;
+Adafruit_SSD1306 display(128, 32, &I2C_display, -1);
 
 QueueHandle_t xQueueSensorData;
 QueueHandle_t queueMQTTdata;
@@ -27,8 +35,21 @@ void setup()
 {
   Serial.begin(115200);
 
-  delay(1000);           // Aguarda o monitor serial iniciar
   I2C_ads.begin(32, 33); // sda, scl
+
+  if (!I2C_display.begin(DP_SDA, DP_SCL, 400000))
+  {
+    Serial.println("Failed to initialize SSD1306!");
+    while (1)
+      ;
+  }
+
+  if (!display.begin(SSD1306_SWITCHCAPVCC, 0x3C))
+  {
+    Serial.println("SSD1306 allocation failed");
+    while (1)
+      ;
+  }
 
   if (!ads.begin(0x48, &I2C_ads))
   {
@@ -38,34 +59,25 @@ void setup()
       ;
   }
 
-  pinMode(19, INPUT_PULLUP);
-  pinMode(5, INPUT_PULLUP);
-
   ads.setGain(GAIN_ONE);
   ads.setDataRate(RATE_ADS1115_860SPS);
 
-  if (!SD.begin(5, spi, 4000000)) { 
+  spi.begin(SD_SCK, SD_MISO, SD_MOSI, -1);
+
+  if (!SD.begin(SD_CS, spi, 4000000))
+  {
     Serial.println("Falha ao montar o cartão SD. Verifique a fiação.");
     return;
   }
 
   uint8_t cardType = SD.cardType();
-  if (cardType == CARD_NONE) {
+  if (cardType == CARD_NONE)
+  {
     Serial.println("Nenhum cartão SD inserido no módulo.");
     return;
   }
 
   Serial.println("Cartão SD montado com sucesso na pinagem customizada!");
-
-  /*xTaskCreatePinnedToCore(
-    TaskCurrentSensor,   // Function to implement the task
-    "TaskCurrentSensor", // Name of the task
-    2048,               // Stack size in words
-    NULL,               // Task input parameter
-    1,                  // Priority of the task
-    NULL,               // Task handle
-    0                   // Core where the task should run
-  );*/
 
   xQueueSensorData = xQueueCreate(10, sizeof(SensorData));
   queueMQTTdata = xQueueCreate(60, sizeof(MQTTData));
@@ -83,12 +95,25 @@ void setup()
   );
 
   xTaskCreatePinnedToCore(
-    TaskProcessSensorData,
-    "TaskProcessSensorData",
+      TaskProcessSensorData,
+      "TaskProcessSensorData",
+      4096,
+      NULL,
+      4,
+      NULL,
+      1);
+
+  xMutexData = xSemaphoreCreateMutex();
+  pinMode(BUTTON_PIN, INPUT_PULLUP);
+  attachInterrupt(BUTTON_PIN, button_isr, FALLING);
+  
+  xTaskCreatePinnedToCore(
+    TaskDisplay, 
+    "Display Task",
     4096,
     NULL,
-    4,
-    NULL,
+    1,
+    &xTaskDisplayHandle,
     1
   );
 
