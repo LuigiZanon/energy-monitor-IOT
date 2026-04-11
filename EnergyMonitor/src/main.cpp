@@ -9,6 +9,7 @@
 #include "sensor.h"
 #include "processing.h"
 #include "display.h"
+#include "network.h"
 
 #define BUTTON_PIN 13
 
@@ -37,7 +38,7 @@ void setup()
 
   I2C_ads.begin(32, 33); // sda, scl
 
-  if (!I2C_display.begin(DP_SDA, DP_SCL, 400000))
+  if (!I2C_display.begin(DP_SDA, DP_SCL, 200000))
   {
     Serial.println("Failed to initialize SSD1306!");
     while (1)
@@ -115,6 +116,16 @@ void setup()
     1,
     &xTaskDisplayHandle,
     1
+  );
+
+  xTaskCreatePinnedToCore(
+      TaskNetwork,
+      "Network Task",
+      8192,             // Stack maior (8KB) pois WiFiManager e MQTT usam muita memória
+      NULL,
+      3,                // Prioridade (menor que a aquisição, maior que display)
+      &xTaskNetworkHandle,
+      0                 // Core 0 (junto com o rádio WiFi nativo)
   );
 
   Serial.println("Setup complete.");
