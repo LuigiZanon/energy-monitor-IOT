@@ -26,11 +26,14 @@ void TaskSensorsRawData(void *pvParameters)
         int16_t sampleZMPT1 = ads.readADC_SingleEnded(1);
         int16_t sampleZMPT2 = ads.readADC_SingleEnded(3);
 
+        Serial.print(">V:");
+        Serial.println(sampleZMPT1);
+
         // subtrai offset DC para centralizar o sinal em torno de 0
-        float sct1 = (float)sampleSCT1 - OFFSET;
-        float sct2 = (float)sampleSCT2 - OFFSET;
-        float zmpt1 = (float)sampleZMPT1 - OFFSET;
-        float zmpt2 = (float)sampleZMPT2 - OFFSET;
+        float sct1 = (float)sampleSCT1 - OFFSET_SCT;
+        float sct2 = (float)sampleSCT2 - OFFSET_SCT;
+        float zmpt1 = (float)sampleZMPT1 - OFFSET_ZMPT;
+        float zmpt2 = (float)sampleZMPT2 - OFFSET_ZMPT;
 
         // acumula o valor ao quadrado para calculo de RMS posterior
         rawDataBatch.sct_1 += (sct1 * sct1);

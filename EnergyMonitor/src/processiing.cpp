@@ -28,8 +28,8 @@ void TaskProcessSensorData(void *pvParameters)
                 mqttData.rms_sct1 = currentRMS_SCT1;
                 mqttData.rms_sct2 = currentRMS_SCT2;
 
-                mqttData.rms_zmpt1 = 125;   // ! apenas para testes
-                mqttData.rms_zmpt2 = 125;   // ! apenas para testes
+                mqttData.rms_zmpt1 = tensionRMS_ZMPT1;   // ! apenas para testes
+                mqttData.rms_zmpt2 = tensionRMS_ZMPT2;   // ! apenas para testes
 
                 Serial.print(">Corrente:");
                 Serial.println(mqttData.rms_sct1);
