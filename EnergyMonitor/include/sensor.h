@@ -6,7 +6,7 @@
 #include <Adafruit_ADS1X15.h>
 
 #define OFFSET_SCT 13200.0
-#define OFFSET_ZMPT 13045.0f
+#define OFFSET_ZMPT 13029.46f
 
 //  Declaracao do ads, extern pois e definido em main.cpp
 extern Adafruit_ADS1115 ads;
