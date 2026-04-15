@@ -72,10 +72,10 @@ void TaskProcessSensorData(void *pvParameters)
                 Serial.print("Erro ao abrir o arquivo");
             }
 
-            // if (queueMQTTdata != NULL)
-            // {
-            //     xQueueSend(queueMQTTdata, &mqttData, 0);
-            // }
+            if (queueMQTTdata != NULL)
+            {
+                xQueueSend(queueMQTTdata, &mqttData, 0);
+            }
         }
     }
 }

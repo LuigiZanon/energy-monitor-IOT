@@ -11,7 +11,7 @@
 
 #define FATOR_CALIBRACAO_FINA 1.00
 
-typedef struct {
+typedef struct __attribute__((packed)){
     uint32_t timestamp;
     float rms_sct1;
     float rms_sct2;

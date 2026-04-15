@@ -10,10 +10,9 @@ WiFiClient espClient;
 PubSubClient mqttClient(espClient);
 
 // 2. Credenciais e Configurações
-const char* mqtt_server = "10.228.47.32";
-const int mqtt_port = 5000;
+const char* mqtt_server = "10.228.47.32"; // IP do computador onde roda o Mosquitto
+const int mqtt_port = 1883;               // TROQUE DE 5000 PARA 1883
 const char* mqtt_topic = "teste/esp";
-
 #define MAX_BATCH 10
 
 // 3. Buffers Locais
@@ -47,6 +46,8 @@ void TaskNetwork(void *pvParameters) {
     mqttClient.setServer(mqtt_server, mqtt_port);
     mqttClient.setBufferSize(512); 
 
+    mqttClient.setSocketTimeout(2);
+
     MQTTData receivedData;
 
     for (;;) {
@@ -71,11 +72,16 @@ void TaskNetwork(void *pvParameters) {
             batchCount++;
 
             if (batchCount >= MAX_BATCH) {
-                if (mqttClient.publish(mqtt_topic, (uint8_t*)batchBuffer, batchCount * sizeof(MQTTData))) {
-                    Serial.println("Lote de dados publicado via MQTT!");
+                // Tamanho exato em bytes do nosso array no momento do envio
+                size_t payloadSize = batchCount * sizeof(MQTTData);
+
+                // Envia o dump de memória (cast para ponteiro de bytes)
+                if (mqttClient.publish(mqtt_topic, (uint8_t*)batchBuffer, payloadSize)) {
+                    Serial.printf("Lote BINÁRIO publicado! (%d bytes)\n", payloadSize);
                 } else {
-                    Serial.println("Falha ao publicar MQTT (Tamanho do buffer?).");
+                    Serial.println("Falha ao publicar lote binário (Verifique a rede).");
                 }
+                
                 batchCount = 0; 
             }
         }
