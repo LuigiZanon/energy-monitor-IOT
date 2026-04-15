@@ -1,5 +1,6 @@
 #include "processing.h"
 #include "sensor.h"
+#include "display.h"
 
 void TaskProcessSensorData(void *pvParameters)
 {
@@ -27,11 +28,19 @@ void TaskProcessSensorData(void *pvParameters)
                 mqttData.rms_sct1 = currentRMS_SCT1;
                 mqttData.rms_sct2 = currentRMS_SCT2;
 
-                mqttData.rms_zmpt1 = tensionRMS_ZMPT1;
-                mqttData.rms_zmpt2 = tensionRMS_ZMPT2;
+                mqttData.rms_zmpt1 = tensionRMS_ZMPT1;   // ! apenas para testes
+                mqttData.rms_zmpt2 = tensionRMS_ZMPT2;   // ! apenas para testes
 
                 Serial.print(">Corrente:");
                 Serial.println(mqttData.rms_sct1);
+
+                if (xSemaphoreTake(xMutexData, portMAX_DELAY) == pdTRUE)
+                {
+                    liveData.v1 = mqttData.rms_zmpt1;
+                    liveData.a1 = mqttData.rms_sct1;
+                    liveData.watts = mqttData.rms_sct1 * mqttData.rms_zmpt1; // Cálculo simplificado
+                    xSemaphoreGive(xMutexData);
+                }
             }
             else
             {
@@ -52,12 +61,13 @@ void TaskProcessSensorData(void *pvParameters)
                      mqttData.rms_zmpt1, mqttData.rms_zmpt2);
 
             File file = SD.open("/datalog.csv", FILE_APPEND);
-            
+
             if (file)
             {
                 file.print(csvLine);
                 file.close();
-            }else
+            }
+            else
             {
                 Serial.print("Erro ao abrir o arquivo");
             }

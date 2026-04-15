@@ -1,61 +1,5 @@
 #include "sensor.h"
 
-// possivelmente necessaria alteracao para offset dinamico
-#define OFFSET 13200.0
-
-short ciclos = 2;
-
-const uint32_t TEMPO_AMOSTRAGEM_US = (1000000 / 60) * ciclos;
-
-/*void TaskCurrentSensor(void *pvParameters)
-{
-
-    static double offsetDC = 13200.0;
-
-    for (;;)
-    {
-        uint32_t tempoInicio = micros();
-        double somaQuadrados = 0;
-        uint32_t totalAmostras = 0;
-
-        while ((micros() - tempoInicio) < TEMPO_AMOSTRAGEM_US)
-        {
-            int16_t sample = ads.readADC_SingleEnded(0);
-
-            offsetDC = offsetDC + ((sample - offsetDC) / 1024.0);
-            double sinalFiltrado = sample - offsetDC;
-
-            Serial.print(">Amostra_bruta:");
-            Serial.println(sinalFiltrado);
-
-            somaQuadrados += (sinalFiltrado * sinalFiltrado);
-            totalAmostras++;
-
-            taskYIELD();
-        }
-
-        if (totalAmostras > 0)
-        {
-            double rmsADC = sqrt(somaQuadrados / totalAmostras);
-            float correnteRMS = (rmsADC * FATOR_TENSAO_ADS) / 1000.0;
-
-            float correnteTeorica = correnteRMS * FATOR_CONVERSAO_SCT;
-
-            float correnteReal = correnteTeorica * FATOR_CALIBRACAO_FINA;
-
-            if (correnteReal < 0.05)
-            {
-                correnteReal = 0.00;
-            }
-
-            Serial.print(">Corrente:");
-            Serial.println(correnteReal);
-        }
-
-        vTaskDelay(pdMS_TO_TICKS(5));
-    }
-}*/
-
 void TaskSensorsRawData(void *pvParameters)
 {
     // taxa de envio em ms vindo como parametro da tarefa
@@ -82,11 +26,14 @@ void TaskSensorsRawData(void *pvParameters)
         int16_t sampleZMPT1 = ads.readADC_SingleEnded(1);
         int16_t sampleZMPT2 = ads.readADC_SingleEnded(3);
 
+        Serial.print(">V:");
+        Serial.println(sampleZMPT1);
+
         // subtrai offset DC para centralizar o sinal em torno de 0
-        float sct1 = (float)sampleSCT1 - OFFSET;
-        float sct2 = (float)sampleSCT2 - OFFSET;
-        float zmpt1 = (float)sampleZMPT1 - OFFSET;
-        float zmpt2 = (float)sampleZMPT2 - OFFSET;
+        float sct1 = (float)sampleSCT1 - OFFSET_SCT;
+        float sct2 = (float)sampleSCT2 - OFFSET_SCT;
+        float zmpt1 = (float)sampleZMPT1 - OFFSET_ZMPT;
+        float zmpt2 = (float)sampleZMPT2 - OFFSET_ZMPT;
 
         // acumula o valor ao quadrado para calculo de RMS posterior
         rawDataBatch.sct_1 += (sct1 * sct1);
