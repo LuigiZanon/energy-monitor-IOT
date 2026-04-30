@@ -8,8 +8,8 @@ extern Adafruit_SSD1306 display;
 
 enum DisplayMode
 {
-    SHOW_V1,
     SHOW_A1,
+    SHOW_V1,
     SHOW_POWER,
     MAX_MODES
 };
