@@ -36,7 +36,7 @@ void setup()
 {
   Serial.begin(115200);
 
-  I2C_ads.begin(32, 33); // sda, scl
+  I2C_ads.begin(33, 32); // sda, scl
 
   if (!I2C_display.begin(DP_SDA, DP_SCL, 200000))
   {

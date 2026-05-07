@@ -33,8 +33,9 @@ try:
         print(f"\nColetando lote de {BATCH_SIZE} amostras...")
         
         for i in range(BATCH_SIZE):
-            # 1. Simulando a função millis() do ESP32 (tempo desde o início do programa)
-            timestamp = int(time.monotonic() * 1000) & 0xFFFFFFFF
+            # 1. Simulando a sincronização NTP do ESP32 (Unix Timestamp em segundos)
+            # A função time.time() devolve os segundos absolutos (ex: 1777919796)
+            timestamp = int(time.time()) & 0xFFFFFFFF
             
             # 2. Gerando valores simulados realistas
             # ZMPT: Tensões variando levemente em torno de 220V
@@ -58,14 +59,14 @@ try:
             # Print de progresso no terminal
             print(f"  [Amostra {i+1}/{BATCH_SIZE}] TS: {timestamp} | V1: {rms_zmpt1:.1f}V | I1: {rms_sct1:.2f}A")
             
-            # Aguarda 1 segundo (Simulando a taxa de leitura de 1Hz da sua task do ESP32)
-            time.sleep(1)
+            # Aguarda (Atenção: como colocou 0.1s, vai gerar várias amostras no mesmo "segundo" do Unix)
+            time.sleep(0.1)
         
         # 4. Envia o pacote completo (Ex: 10 amostras * 20 bytes = 200 bytes)
         client.publish(TOPIC, payload)
         print(f"🚀 Lote binário publicado! ({len(payload)} bytes enviados)")
 
 except KeyboardInterrupt:
-    print("\n🛑 Simulador encerrado pelo usuário.")
+    print("\n🛑 Simulador encerrado pelo utilizador.")
     client.loop_stop()
     client.disconnect()

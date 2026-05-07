@@ -11,7 +11,7 @@ WiFiClient espClient;
 PubSubClient mqttClient(espClient);
 
 // 2. Credenciais e Configurações
-const char *mqtt_server = "10.228.47.32"; // IP do computador onde roda o Mosquitto
+const char *mqtt_server = "10.228.47.30"; // IP do computador onde roda o Mosquitto
 const int mqtt_port = 1883;               // TROQUE DE 5000 PARA 1883
 const char *mqtt_topic = "teste/esp";
 #define MAX_BATCH 10
