@@ -11,7 +11,7 @@ WiFiClient espClient;
 PubSubClient mqttClient(espClient);
 
 // 2. Credenciais e Configurações
-const char *mqtt_server = "10.228.47.30"; // IP do computador onde roda o Mosquitto
+const char *mqtt_server = "10.228.47.32"; // IP do computador onde roda o Mosquitto
 const int mqtt_port = 1883;               // TROQUE DE 5000 PARA 1883
 const char *mqtt_topic = "teste/esp";
 #define MAX_BATCH 10
@@ -36,18 +36,29 @@ void reconnectMQTT()
     }
 }
 
-void TaskNetwork(void *pvParameters)
-{
+void TaskNetwork(void *pvParameters) {
     WiFiManager wm;
     Serial.println("Iniciando WiFiManager...");
+    
+    // --- MODO DE DEPURACÃO (Descomente a linha abaixo apenas se quiser apagar as redes salvas para testar o portal novamente) ---
+    // wm.resetSettings();
 
-    if (!wm.autoConnect("EnergyMonitor", ""))
-    {
-        Serial.println("Falha ao conectar no WiFi. Reiniciando ESP...");
+    // Define um tempo limite de 3 minutos (180 segundos) para o Portal de Configuração.
+    // Se a energia cair e o roteador da casa demorar a voltar, o ESP não fica travado para sempre no modo AP.
+    wm.setConfigPortalTimeout(180);
+
+    Serial.println("Tentando conectar... Se falhar, procure a rede 'EnergyMonitor' no seu celular.");
+    
+    // Tenta conectar. Se não conseguir, cria o AP "EnergyMonitor" sem senha.
+    if(!wm.autoConnect("EnergyMonitor")) {
+        Serial.println("Falha ao conectar ou tempo do portal esgotado. Reiniciando ESP...");
         vTaskDelay(pdMS_TO_TICKS(3000));
-        ESP.restart();
+        ESP.restart(); // Reinicia e tenta de novo
     }
+    
     Serial.println("WiFi Conectado com Sucesso!");
+    Serial.print("IP: ");
+    Serial.println(WiFi.localIP());
 
     Serial.print("Sincronizando relógio via NTP...");
 

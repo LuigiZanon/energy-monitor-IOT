@@ -83,6 +83,14 @@ void setup()
   xQueueSensorData = xQueueCreate(10, sizeof(SensorData));
   queueMQTTdata = xQueueCreate(60, sizeof(MQTTData));
 
+  Serial.println("Calibrando offsets dos sensores...");
+
+  calibrarOffsets();
+
+  Serial.println("Offsets calibrados. Iniciando tarefas...");
+
+  Serial.println("Criando tarefas...");
+
   uint32_t send_rate_ms = 1000; // Taxa de envio em ms
 
   xTaskCreatePinnedToCore(
