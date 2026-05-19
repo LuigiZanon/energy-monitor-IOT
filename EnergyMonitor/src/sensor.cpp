@@ -1,5 +1,31 @@
 #include "sensor.h"
 
+// Variáveis globais para guardar o centro de cada sensor
+float offset_SCT1 = 0;
+float offset_SCT2 = 0;
+
+void calibrarOffsets() {
+    Serial.println("Calibrando Offsets dos SCTs...");
+    long soma_SCT1 = 0;
+    long soma_SCT2 = 0;
+    int amostras_calibracao = 0;
+    
+    uint32_t tempoInicio = millis();
+    
+    // Lê os canais o mais rápido possível durante 1 segundo
+    while (millis() - tempoInicio < 1000) {
+        soma_SCT1 += ads.readADC_SingleEnded(0);
+        soma_SCT2 += ads.readADC_SingleEnded(2);
+        amostras_calibracao++;
+    }
+    
+    // Calcula a média exata (o novo "Zero") de cada sensor
+    offset_SCT1 = (float)soma_SCT1 / amostras_calibracao;
+    offset_SCT2 = (float)soma_SCT2 / amostras_calibracao;
+    
+    Serial.printf("Offset SCT1: %.2f | Offset SCT2: %.2f\n", offset_SCT1, offset_SCT2);
+}
+
 void TaskSensorsRawData(void *pvParameters)
 {
     // taxa de envio em ms vindo como parametro da tarefa
@@ -26,12 +52,9 @@ void TaskSensorsRawData(void *pvParameters)
         int16_t sampleZMPT1 = ads.readADC_SingleEnded(1);
         int16_t sampleZMPT2 = ads.readADC_SingleEnded(3);
 
-        // Serial.print(">V:");
-        // Serial.println(sampleZMPT1);
-
         // subtrai offset DC para centralizar o sinal em torno de 0
-        float sct1 = (float)sampleSCT1 - OFFSET_SCT;
-        float sct2 = (float)sampleSCT2 - OFFSET_SCT;
+        float sct1 = (float)sampleSCT1 - offset_SCT1;
+        float sct2 = (float)sampleSCT2 - offset_SCT2;
         float zmpt1 = (float)sampleZMPT1 - OFFSET_ZMPT;
         float zmpt2 = (float)sampleZMPT2 - OFFSET_ZMPT;
 

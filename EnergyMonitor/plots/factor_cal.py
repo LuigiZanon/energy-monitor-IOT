@@ -64,7 +64,7 @@ def calibrar_zmpt(arquivo_csv, tensao_real_medida, coluna_adc='V', ganho_ads=0.1
 # CONFIGURAÇÃO DO TESTE
 # ==========================================
 # Coloque aqui o valor que você leu no multímetro na hora do teste
-TENSAO_MULTIMETRO = 120.0  
+TENSAO_MULTIMETRO = 124.7
 
 # MÁGICA: O Python encontra o arquivo sozinho!
 arquivo_alvo = pegar_csv_mais_recente()

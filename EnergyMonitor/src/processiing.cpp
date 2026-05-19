@@ -31,13 +31,15 @@ void TaskProcessSensorData(void *pvParameters)
                 mqttData.rms_zmpt1 = tensionRMS_ZMPT1;   // ! apenas para testes
                 mqttData.rms_zmpt2 = tensionRMS_ZMPT2;   // ! apenas para testes
 
-                Serial.print(">Corrente:");
-                Serial.println(mqttData.rms_sct1);
+                // Serial.print(">Corrente:");
+                // Serial.println(mqttData.rms_sct1);
 
                 if (xSemaphoreTake(xMutexData, portMAX_DELAY) == pdTRUE)
                 {
-                    liveData.v1 = mqttData.rms_zmpt1;
+                    liveData.v1 = mqttData.rms_zmpt1; // zmpt1
                     liveData.a1 = mqttData.rms_sct1;
+                    liveData.v2 = mqttData.rms_zmpt2; // zmpt2 
+                    liveData.a2 = mqttData.rms_sct2;
                     liveData.watts = mqttData.rms_sct1 * mqttData.rms_zmpt1; // Cálculo simplificado
                     xSemaphoreGive(xMutexData);
                 }
@@ -51,7 +53,11 @@ void TaskProcessSensorData(void *pvParameters)
                 mqttData.rms_zmpt2 = 0;
             }
 
-            mqttData.timestamp = millis();
+            // mqttData.timestamp = millis();
+
+            time_t tempo_atual;
+            time(&tempo_atual);
+            mqttData.timestamp = (uint32_t)tempo_atual;
 
             char csvLine[64];
 

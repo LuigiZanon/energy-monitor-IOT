@@ -5,8 +5,8 @@
 #include <freertos/FreeRTOS.h>
 #include <Adafruit_ADS1X15.h>
 
-#define OFFSET_SCT 13200.0
-#define OFFSET_ZMPT 13029.46f
+#define OFFSET_SCT 13050.0
+#define OFFSET_ZMPT 13138.1f
 
 //  Declaracao do ads, extern pois e definido em main.cpp
 extern Adafruit_ADS1115 ads;
@@ -21,7 +21,7 @@ typedef struct {
     uint16_t samples;
 } SensorData;
 
-void TaskCurrentSensor(void *pvParameters);
+void calibrarOffsets();
 
 void TaskSensorsRawData(void *pvParameters);
 

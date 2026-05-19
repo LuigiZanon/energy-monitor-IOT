@@ -36,7 +36,7 @@ void setup()
 {
   Serial.begin(115200);
 
-  I2C_ads.begin(32, 33); // sda, scl
+  I2C_ads.begin(33, 32); // sda, scl
 
   if (!I2C_display.begin(DP_SDA, DP_SCL, 200000))
   {
@@ -82,6 +82,14 @@ void setup()
 
   xQueueSensorData = xQueueCreate(10, sizeof(SensorData));
   queueMQTTdata = xQueueCreate(60, sizeof(MQTTData));
+
+  Serial.println("Calibrando offsets dos sensores...");
+
+  calibrarOffsets();
+
+  Serial.println("Offsets calibrados. Iniciando tarefas...");
+
+  Serial.println("Criando tarefas...");
 
   uint32_t send_rate_ms = 1000; // Taxa de envio em ms
 

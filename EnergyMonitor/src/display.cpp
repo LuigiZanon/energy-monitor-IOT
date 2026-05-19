@@ -47,6 +47,16 @@ void TaskDisplay(void *pvParameters)
                 display.setTextSize(2);
                 display.printf("%.0f W", temp.watts);
                 break;
+            case SHOW_V2:
+                display.println("TENSAO FASE 2");
+                display.setTextSize(2);
+                display.printf("%.1f V", temp.v2); // Substitua por temp.v2 quando disponível
+                break;
+            case SHOW_A2:
+                display.println("CORRENTE FASE 2");
+                display.setTextSize(2);
+                display.printf("%.2f A", temp.a2);
+                break;
         }
 
         display.display();

@@ -10,13 +10,15 @@ enum DisplayMode
 {
     SHOW_V1,
     SHOW_A1,
+    SHOW_V2,
+    SHOW_A2,
     SHOW_POWER,
     MAX_MODES
 };
 
 typedef struct 
 {
-    float v1, a1, watts;
+    float v1, a1, v2, a2, watts;
 } DisplayData;
 
 extern DisplayData liveData;
